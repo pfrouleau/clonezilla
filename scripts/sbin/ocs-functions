@@ -1023,6 +1023,15 @@ output_swap_partition_uuid_label() {
   echo $msg_delimiter_star_line
 } # end of output_swap_partition_uuid_label
 #
+show_volume_limit() {
+  case "$1" in
+    [1-9]*)
+       echo "Image file will be split with size limit $1 MB." ;;
+    *)
+       echo "Image file will not be split." ;;
+  esac
+} # end of show_volume_limit
+#
 save_part_by_ntfsclone() {
   # case (1): ntfsclone is preferred
   compress_prog_opt="$IMG_CLONE_CMP"
@@ -1046,12 +1055,7 @@ save_part_by_ntfsclone() {
      ntfs_img_info_tmp="$(mktemp /tmp/ntfs_info.XXXXXX)" ;;
   esac
   echo "Use ntfsclone with $compress_prog_prompt to save the image."
-  case "$VOL_LIMIT" in
-    [1-9]*)
-       echo "Image file will be split with size limit $VOL_LIMIT MB." ;;
-    *)
-       echo "Image file will not be split." ;;
-  esac
+  show_volume_limit "$VOL_LIMIT"
   echo $msg_delimiter_star_line
   [ "$BOOTUP" = "color" ] && $SETCOLOR_WARNING
   echo "If this action fails or hangs, check:"
@@ -1183,12 +1187,7 @@ save_part_by_partclone() {
   [ -e "$partclone_img_info_tmp" ] && rm -f $partclone_img_info_tmp
   echo $msg_delimiter_star_line | tee --append ${OCS_LOGFILE}
   echo "Use partclone with $compress_prog_prompt to save the image." | tee --append ${OCS_LOGFILE}
-  case "$VOL_LIMIT" in
-    [1-9]*)
-       echo "Image file will be split with size limit $VOL_LIMIT MB." | tee --append ${OCS_LOGFILE} ;;
-    *)
-       echo "Image file will not be split." | tee --append ${OCS_LOGFILE} ;;
-  esac
+  show_volume_limit "$VOL_LIMIT" | tee --append ${OCS_LOGFILE}
   echo $msg_delimiter_star_line | tee --append ${OCS_LOGFILE}
   [ "$BOOTUP" = "color" ] && $SETCOLOR_WARNING
   echo "If this action fails or hangs, check:" | tee --append ${OCS_LOGFILE}
@@ -1268,12 +1267,7 @@ save_part_by_partimage() {
   echo $msg_delimiter_star_line
   check_partimage_partition_integrity $source_dev
   echo "Use $compress_prog_prompt to compress the image." | tee --append ${OCS_LOGFILE}
-  case "$VOL_LIMIT" in
-    [1-9]*)
-       echo "Image file will be split with size limit $VOL_LIMIT MB." | tee --append ${OCS_LOGFILE} ;;
-    *)
-       echo "Image will not be split." | tee --append ${OCS_LOGFILE} ;;
-  esac
+  show_volume_limit "$VOL_LIMIT" | tee --append ${OCS_LOGFILE}
   echo $msg_delimiter_star_line
   # it is important to run partimage in save mode with volume=0 and -B gui=no
   # so that we can send the data to stdout
@@ -1344,12 +1338,7 @@ save_part_by_dd() {
     ;;
   esac
   [ "$BOOTUP" = "color" ] && $SETCOLOR_NORMAL
-  case "$VOL_LIMIT" in
-    [1-9]*)
-       echo "Image file will be split with size limit $VOL_LIMIT MB." | tee --append ${OCS_LOGFILE} ;;
-    *)
-       echo "Image file will not be split." | tee --append ${OCS_LOGFILE} ;;
-  esac
+  show_volume_limit "$VOL_LIMIT" | tee --append ${OCS_LOGFILE}
   [ "$BOOTUP" = "color" ] && $SETCOLOR_WARNING
   echo "If this action fails or hangs after several minutes, check:" | tee --append ${OCS_LOGFILE}
   echo "* Is the disk full ?" | tee --append ${OCS_LOGFILE}
