@@ -1448,7 +1448,7 @@ save_part_by_dd() {
     fi
     rm -f $split_error
     # sync_and_active_exec_files
-    # UGLY! Since we use partclone, then pipe to compression program, then IO redirect to file, the error control is weak. partclone wil not exit even if the disk is full. Therefore we check here.
+    # UGLY! Since we use partclone, then pipe to compression program, then IO redirect to file, the error control is weak. partclone will not exit even if the disk is full. Therefore we check here.
     echo "Checking the disk space... " && disk_full_test $image_name_ "The saved image file $tgt_dir/$(to_filename {tgt_file}).dd-img is incomplete! You have to increase the disk space, then start clonezilla save mode again."
     get_partclone_image_info $partclone_img_info_tmp $start_time $end_time
     [ $rc -eq 0 ] && rc=$?
