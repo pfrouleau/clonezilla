@@ -1353,7 +1353,7 @@ save_part_by_dd() {
   [ "$BOOTUP" = "color" ] && $SETCOLOR_WARNING
   echo "If this action fails or hangs after several minutes, check:" | tee --append ${OCS_LOGFILE}
   echo "* Is the disk full ?" | tee --append ${OCS_LOGFILE}
-  [ "$(root_over_nfs)" = "yes" ] && echo "* Network connection and NFS service."
+  [ "$(root_over_nfs)" = "yes" ] && echo "* Network connection and NFS service." | tee --append ${OCS_LOGFILE}
   [ "$BOOTUP" = "color" ] && $SETCOLOR_NORMAL
   echo $msg_delimiter_star_line | tee --append ${OCS_LOGFILE}
 
@@ -4677,7 +4677,7 @@ unicast_restore_by_partclone() {
   [ "$BOOTUP" = "color" ] && $SETCOLOR_WARNING
   echo "If this action fails or hangs, check:" | tee --append ${OCS_LOGFILE}
   echo "* Is the saved image $target_d/$img_file_prefix corrupted ?"  | tee --append ${OCS_LOGFILE}
-  [ "$(root_over_nfs)" = "yes" ] && echo "* Network connection and NFS service."
+  [ "$(root_over_nfs)" = "yes" ] && echo "* Network connection and NFS service." | tee --append ${OCS_LOGFILE}
   [ "$BOOTUP" = "color" ] && $SETCOLOR_NORMAL
   echo $msg_delimiter_star_line | tee --append ${OCS_LOGFILE}
 
