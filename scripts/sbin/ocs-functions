@@ -1088,6 +1088,10 @@ save_part_by_ntfsclone() {
     echo "WARNING!!! ntfsclone is run with extra option(s): $ntfsclone_save_extra_opt"
     [ "$BOOTUP" = "color" ] && $SETCOLOR_NORMAL
   fi
+
+  split_error="$(mktemp /tmp/split_error.XXXXXX)"
+  trap "[ -f "$split_error" ] && rm -f $split_error" HUP INT QUIT TERM EXIT
+
   cmd_clone="ntfsclone $ntfsclone_save_extra_opt_def $ntfsclone_save_extra_opt --save-image --output - $source_dev"
   build_cmd_split "$VOL_LIMIT" "$tgt_dir/$(to_filename ${tgt_file}).ntfs-img" "$split_error"
   cmd_chain="$cmd_clone | $compress_prog_opt | $cmd_split"
@@ -1096,6 +1100,10 @@ save_part_by_ntfsclone() {
 #  ( $cmd_clone | $compress_prog_opt | $cmd_split ) 2>&1 | tee $ntfs_img_info_tmp
   rc="$?" # return code from tee
   end_time="$(date +%s%N)"
+  if [ -s "$split_error" ]; then
+    cat $split_error | tee --append ${OCS_LOGFILE}
+  fi
+  rm -f $split_error
   # UGLY! Since we use ntfsclone, then pipe to compression program, then IO redirect to file, the error control is weak. ntfsclone wil not exit even if the disk is full. Therefore we check here.
   echo "Checking the disk space... " && disk_full_test $image_name_ "The saved image file $tgt_dir/${tgt_file}.ntfs-img is incomplete! You have to increase the disk space, then start clonezilla save mode again."
   get_ntfs_image_info $ntfs_img_info_tmp $start_time $end_time
@@ -1271,6 +1279,10 @@ save_part_by_partimage() {
   # it is important to run partimage in save mode with volume=0 and -B gui=no
   # so that we can send the data to stdout
   start_time="$(date +%s%N)"
+
+  split_error="$(mktemp /tmp/split_error.XXXXXX)"
+  trap "[ -f "$split_error" ] && rm -f $split_error" HUP INT QUIT TERM EXIT
+
   cmd_clone="partimage $DEFAULT_PARTIMAGE_SAVE_OPT $PARTIMAGE_SAVE_OPT -B gui=no save $source_dev stdout"
   build_cmd_split "$VOL_LIMIT" "$tgt_dir/$(to_filename ${tgt_file})" "$split_error"
   cmd_chain="$cmd_clone | $compress_prog_opt | $cmd_split"
@@ -1278,6 +1290,10 @@ save_part_by_partimage() {
   LC_ALL=C eval "(${cmd_chain} && exit \${PIPESTATUS[0]})"
   rc="$?"
   end_time="$(date +%s%N)"
+  if [ -s "$split_error" ]; then
+    cat $split_error | tee --append ${OCS_LOGFILE}
+  fi
+  rm -f $split_error
   calculate_elapsed_time $start_time $end_time
   echo ">>> Time elapsed: $time_elapsed secs (~ $time_elapsed_in_min mins)" | tee --append ${OCS_LOGFILE}
   # For better security
@@ -1347,6 +1363,10 @@ save_part_by_dd() {
     trigger_dd_status_report $source_dev $part_size &
     dd_report_sig_pid=$!
     start_time="$(date +%s%N)"
+
+    split_error="$(mktemp /tmp/split_error.XXXXXX)"
+    trap "[ -f "$split_error" ] && rm -f $split_error" HUP INT QUIT TERM EXIT
+
     cmd_clone="LC_ALL=C dd bs=1M if=$source_dev $dd_save_extra_opt 2> $dd_img_info_tmp"
     build_cmd_split "$VOL_LIMIT" "$tgt_dir/$(to_filename ${tgt_file}).dd-img" "$split_error"
     cmd_chain="$cmd_clone | $compress_prog_opt | $cmd_split | tee $dd_img_info_tmp 2>&1"
@@ -1360,6 +1380,10 @@ save_part_by_dd() {
     rc=$dd_retcode
 
     end_time="$(date +%s%N)"
+    if [ -s "$split_error" ]; then
+      cat $split_error | tee --append ${OCS_LOGFILE}
+    fi
+    rm -f $split_error
     kill -9 $dd_report_sig_pid &>/dev/null
     # save the size so that when we restore the image, partition size can be shown in the status report. This is better than to get partition info from *-pt.sf (which is shown in sectors, not absolute value) or uncompress *.dd-img then get the partition info in the loop device file (not efficient).
     echo "$part_size" > $tgt_dir/$(to_filename ${tgt_file})-size
