@@ -1051,9 +1051,6 @@ build_cmd_split() {
 #
 save_part_by_ntfsclone() {
   # case (1): ntfsclone is preferred
-  compress_prog_opt="$IMG_CLONE_CMP"
-  [ -z "$IMG_CLONE_CMP" ] && compress_prog_opt="gzip -c $extra_gzip_opt"
-  compress_prog_prompt="$(echo "$compress_prog_opt" | sed -e "s/ -.*//g")"
   echo $msg_delimiter_star_line
   # Before saving, we check the ntfs integrity if ntfs_integrity_check is not "no"
   if [ "$ntfs_integrity_check" != "no" ]; then
@@ -1071,6 +1068,9 @@ save_part_by_ntfsclone() {
   *)
      ntfs_img_info_tmp="$(mktemp /tmp/ntfs_info.XXXXXX)" ;;
   esac
+  compress_prog_opt="$IMG_CLONE_CMP"
+  [ -z "$IMG_CLONE_CMP" ] && compress_prog_opt="gzip -c $extra_gzip_opt"
+  compress_prog_prompt="$(echo "$compress_prog_opt" | sed -e "s/ -.*//g")"
   echo "Use ntfsclone with $compress_prog_prompt to save the image."
   show_volume_limit "$VOL_LIMIT"
   echo $msg_delimiter_star_line
@@ -1182,11 +1182,6 @@ save_part_by_partclone() {
   fs_p="${fs_save}"  # variable to run partclone, i.e. partclone.${fs_p}
   fs_pre="${fs_save}-ptcl"  # image name prefix, e.g. sda1."ext4-ptcl"-img.gz
 
-  compress_prog_opt="$IMG_CLONE_CMP"
-  [ -z "$IMG_CLONE_CMP" ] && compress_prog_opt="gzip -c $extra_gzip_opt"
-  compress_prog_prompt="$(echo "$compress_prog_opt" | sed -e "s/ -.*//g")"
-  comp_suf="$(ocs-get-comp-suffix $compress_prog_opt)"
-
   echo $msg_delimiter_star_line | tee --append ${OCS_LOGFILE}
   echo "Checking the disk space... " && disk_full_test $image_name_
   # assign partclone tmp file.
@@ -1200,6 +1195,10 @@ save_part_by_partclone() {
   esac
   [ -e "$partclone_img_info_tmp" ] && rm -f $partclone_img_info_tmp
   echo $msg_delimiter_star_line | tee --append ${OCS_LOGFILE}
+  compress_prog_opt="$IMG_CLONE_CMP"
+  [ -z "$IMG_CLONE_CMP" ] && compress_prog_opt="gzip -c $extra_gzip_opt"
+  compress_prog_prompt="$(echo "$compress_prog_opt" | sed -e "s/ -.*//g")"
+  comp_suf="$(ocs-get-comp-suffix $compress_prog_opt)"
   echo "Use partclone with $compress_prog_prompt to save the image." | tee --append ${OCS_LOGFILE}
   show_volume_limit "$VOL_LIMIT" | tee --append ${OCS_LOGFILE}
   echo $msg_delimiter_star_line | tee --append ${OCS_LOGFILE}
@@ -1264,15 +1263,12 @@ save_part_by_partimage() {
   # Note! From partimage 0.6.7_beta1 with patch file from Thomas Tsai, it's not necessary to do this check check_blocks_per_group_of_ext2_3.
   # [ "$part_fs" = "ext2" -o "$part_fs" = "ext3" ] && check_blocks_per_group_of_ext2_3 $source_dev $tgt_dir
   #
-  compress_prog_opt="$IMG_CLONE_CMP"
-  # if something went wrong, we convert to gzip.
-  if [ -z "$IMG_CLONE_CMP" ] || ! type lzop &>/dev/null; then
-    compress_prog_opt="gzip -c $extra_gzip_opt"
-  fi
-  compress_prog_prompt="$(echo "$compress_prog_opt" | sed -e "s/ -.*//g")"
   # Before saving, we check the filesystem integrity
   echo $msg_delimiter_star_line
   check_partimage_partition_integrity $source_dev
+  compress_prog_opt="$IMG_CLONE_CMP"
+  [ -z "$IMG_CLONE_CMP" ] && compress_prog_opt="gzip -c $extra_gzip_opt"
+  compress_prog_prompt="$(echo "$compress_prog_opt" | sed -e "s/ -.*//g")"
   echo "Use $compress_prog_prompt to compress the image." | tee --append ${OCS_LOGFILE}
   show_volume_limit "$VOL_LIMIT" | tee --append ${OCS_LOGFILE}
   echo $msg_delimiter_star_line
@@ -1324,9 +1320,6 @@ save_part_by_dd() {
     s2s_img_prog_for_save="$S2S_IMAGE_PROG_IN_OCS"
     dd_save_extra_opt=""
   fi
-  compress_prog_opt="$IMG_CLONE_CMP"
-  [ -z "$IMG_CLONE_CMP" ] && compress_prog_opt="gzip -c $extra_gzip_opt"
-  compress_prog_prompt="$(echo "$compress_prog_opt" | sed -e "s/ -.*//g")"
 
   echo $msg_delimiter_star_line | tee --append ${OCS_LOGFILE}
   echo "Checking the disk space... " && disk_full_test $image_name_
@@ -1334,6 +1327,9 @@ save_part_by_dd() {
   echo "$msg_fs_not_supported_by_partimage_ntfsclone: $part_fs" | tee --append ${OCS_LOGFILE}
   echo "$msg_cons_for_dd_clone" | tee --append ${OCS_LOGFILE}
   echo "$msg_will_be_inefficent_and_slow..."
+  compress_prog_opt="$IMG_CLONE_CMP"
+  [ -z "$IMG_CLONE_CMP" ] && compress_prog_opt="gzip -c $extra_gzip_opt"
+  compress_prog_prompt="$(echo "$compress_prog_opt" | sed -e "s/ -.*//g")"
   case "$s2s_img_prog_for_save" in
   dd)
     echo "$msg_use_this_method_to_save_img: dd + $compress_prog_prompt" | tee --append ${OCS_LOGFILE}
