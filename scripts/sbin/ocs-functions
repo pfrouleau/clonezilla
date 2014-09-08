@@ -1059,7 +1059,6 @@ save_part_by_ntfsclone() {
     echo "Assume the NTFS integrity is OK. Skip checking it!"
     ntfsclone_save_extra_opt="--force --rescue"
   fi
-  echo "Checking the disk space... " && disk_full_test $image_name_
   # assign ntfsclone tmp file.
   case "$ntfsclone_progress" in
   "image_dir")
@@ -1183,7 +1182,6 @@ save_part_by_partclone() {
   fs_pre="${fs_save}-ptcl"  # image name prefix, e.g. sda1."ext4-ptcl"-img.gz
 
   echo $msg_delimiter_star_line | tee --append ${OCS_LOGFILE}
-  echo "Checking the disk space... " && disk_full_test $image_name_
   # assign partclone tmp file.
   # TODO: partclone_progress is not set actually
   case "$partclone_progress" in
@@ -1322,7 +1320,6 @@ save_part_by_dd() {
   fi
 
   echo $msg_delimiter_star_line | tee --append ${OCS_LOGFILE}
-  echo "Checking the disk space... " && disk_full_test $image_name_
   [ "$BOOTUP" = "color" ] && $SETCOLOR_WARNING
   echo "$msg_fs_not_supported_by_partimage_ntfsclone: $part_fs" | tee --append ${OCS_LOGFILE}
   echo "$msg_cons_for_dd_clone" | tee --append ${OCS_LOGFILE}
@@ -1484,6 +1481,8 @@ image_save() {
   
   # get the filesystem
   part_fs="$(ocs-get-part-info $source_dev filesystem)"
+
+  echo "Checking the disk space... " && disk_full_test $image_name_
 
   if [ "$rm_win_swap_hib" = "yes" ]; then
     # page and hibernation files should only exist in fat or ntfs partition.
