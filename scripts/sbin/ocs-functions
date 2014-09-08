@@ -1091,7 +1091,7 @@ save_part_by_ntfsclone() {
   split_error="$(mktemp /tmp/split_error.XXXXXX)"
   trap "[ -f "$split_error" ] && rm -f $split_error" HUP INT QUIT TERM EXIT
 
-  cmd_clone="ntfsclone $ntfsclone_save_extra_opt_def $ntfsclone_save_extra_opt --save-image --output - $source_dev"
+  cmd_clone="ntfsclone $ntfsclone_save_extra_opt --save-image --output - $source_dev"
   build_cmd_split "$VOL_LIMIT" "$tgt_dir/$(to_filename ${tgt_file}).ntfs-img" "$split_error"
   cmd_chain="$cmd_clone | $compress_prog_opt | $cmd_split"
   echo "Run partclone: $cmd_chain" | tee --append ${OCS_LOGFILE}
